@@ -26,8 +26,8 @@ function App() {
   const [selectedVaultId, setSelectedVaultId] = useState<number | null>(null);
   const [userVaults, setUserVaults] = useState<VaultInfo[]>([]);
   const [isLoadingVaults, setIsLoadingVaults] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [createdVaults, setCreatedVaults] = useState<number[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     checkConnectedWallet();
@@ -81,7 +81,6 @@ function App() {
     
     setIsLoadingVaults(true);
     try {
-      // Combine created vaults with guardian vaults
       const allVaults: VaultInfo[] = [];
 
       // Add created vaults (as owner)
@@ -89,19 +88,18 @@ function App() {
         allVaults.push({
           id: vaultId,
           owner: account,
-          isGuardian: false, // Owner has full access
-          balance: "0" // Will be loaded in VaultCard
+          isGuardian: false,
+          balance: "0"
         });
       });
 
-      // Add guardian vaults (vaults where user is a guardian but not owner)
+      // Add guardian vaults
       const guardianVaults = await loadGuardianVaults(account);
       allVaults.push(...guardianVaults);
 
       setUserVaults(allVaults);
     } catch (error) {
       console.error("Error loading vaults:", error);
-      // Fallback to just created vaults
       setUserVaults(createdVaults.map(id => ({
         id,
         owner: account,
@@ -115,17 +113,13 @@ function App() {
 
   const loadGuardianVaults = async (userAddress: string): Promise<VaultInfo[]> => {
     try {
-      // Mock guardian vaults - in real app, query blockchain for vaults where user is guardian
-      // This would require a contract function to get guardian vaults
-      
-      // For demo, return some mock guardian vaults based on user address
       const addressHash = userAddress.slice(2, 10);
       const baseId = parseInt(addressHash, 16) % 1000;
       
       return [
         {
-          id: baseId + 100, // Different ID range for guardian vaults
-          owner: "0x893a35Cc6634C0532925a3b8D9a1F2E1C1D3a1c3", // Different owner
+          id: baseId + 100,
+          owner: "0x893a35Cc6634C0532925a3b8D9a1F2E1C1D3a1c3",
           isGuardian: true,
           balance: "2.5"
         },
@@ -143,9 +137,7 @@ function App() {
   };
 
   const handleVaultCreated = (vaultId: number) => {
-    // Add the new vault to our created vaults list
     setCreatedVaults(prev => [...prev, vaultId]);
-    // Reload vaults to include the new one
     setTimeout(() => loadUserVaults(), 1000);
     alert("Vault created successfully! 🎉");
   };
@@ -160,13 +152,13 @@ function App() {
   };
 
   const navigation = [
-    { id: "dashboard", label: "Dashboard" },
-    { id: "upload", label: "Upload & Encrypt" },
-    { id: "decrypt", label: "Decrypt Files" },
-    { id: "vaults", label: "Crypto Vaults" },
-    { id: "transactions", label: "Transactions" },
-    { id: "inheritance", label: "Inheritance" },
-    { id: "settings", label: "Settings" },
+    { id: "dashboard", label: "Dashboard", icon: "📊" },
+    { id: "upload", label: "Upload & Encrypt", icon: "📁" },
+    { id: "decrypt", label: "Decrypt Files", icon: "🔓" },
+    { id: "vaults", label: "Crypto Vaults", icon: "🏦" },
+    { id: "transactions", label: "Transactions", icon: "💳" },
+    { id: "inheritance", label: "Inheritance", icon: "⚖️" },
+    { id: "settings", label: "Settings", icon: "⚙️" },
   ];
 
   const ownedVaults = userVaults.filter(vault => !vault.isGuardian);
@@ -180,29 +172,29 @@ function App() {
         return (
           <div className="max-w-6xl mx-auto">
             <div className="text-center py-8 sm:py-12">
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4">
                 Welcome to OwlVault 🦉
               </h1>
-              <p className="text-gray-600 text-base sm:text-lg mb-6 sm:mb-8">
+              <p className="text-blue-100 text-base sm:text-lg mb-6 sm:mb-8">
                 Secure your documents and cryptocurrency with multi-signature protection
               </p>
 
               {account && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-8">
-                  <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 text-center">
+                  <div className="bg-blue-500/20 backdrop-blur-lg p-4 sm:p-6 rounded-xl shadow-lg border border-blue-400/30 text-center">
                     <div className="text-2xl mb-2">🔐</div>
-                    <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Multi-Signature</h3>
-                    <p className="text-xs sm:text-sm text-gray-600">2/3 guardian approval required</p>
+                    <h3 className="font-semibold text-white mb-2 text-sm sm:text-base">Multi-Signature</h3>
+                    <p className="text-blue-100 text-xs sm:text-sm">2/3 guardian approval required</p>
                   </div>
-                  <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 text-center">
+                  <div className="bg-blue-500/20 backdrop-blur-lg p-4 sm:p-6 rounded-xl shadow-lg border border-blue-400/30 text-center">
                     <div className="text-2xl mb-2">📄</div>
-                    <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Encrypted Storage</h3>
-                    <p className="text-xs sm:text-sm text-gray-600">Military-grade file encryption</p>
+                    <h3 className="font-semibold text-white mb-2 text-sm sm:text-base">Encrypted Storage</h3>
+                    <p className="text-blue-100 text-xs sm:text-sm">Military-grade file encryption</p>
                   </div>
-                  <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md border border-gray-200 text-center">
+                  <div className="bg-blue-500/20 backdrop-blur-lg p-4 sm:p-6 rounded-xl shadow-lg border border-blue-400/30 text-center">
                     <div className="text-2xl mb-2">⏰</div>
-                    <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Time-Locked</h3> 
-                    <p className="text-xs sm:text-sm text-gray-600">Custom unlock periods</p>    
+                    <h3 className="font-semibold text-white mb-2 text-sm sm:text-base">Time-Locked</h3> 
+                    <p className="text-blue-100 text-xs sm:text-sm">Custom unlock periods</p>    
                   </div>
                 </div>
               )}
@@ -218,14 +210,14 @@ function App() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Crypto Vaults</h1>   
-                <p className="text-gray-600 text-sm sm:text-base">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Crypto Vaults</h1>   
+                <p className="text-blue-100 text-sm sm:text-base">
                   {account ? `Vaults for ${formatAddress(account)}` : "Manage your multi-signature vaults"}
                 </p>   
               </div>
               <button
                 onClick={() => setShowVaultModal(true)}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base w-full sm:w-auto"
+                className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-semibold transition-colors text-sm sm:text-base w-full sm:w-auto shadow-lg shadow-cyan-500/30"
               >
                 + Create Vault
               </button>
@@ -234,10 +226,10 @@ function App() {
             {isLoadingVaults ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">  
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 animate-pulse">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>        
-                    <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>        
-                    <div className="h-10 bg-gray-200 rounded"></div>
+                  <div key={i} className="bg-blue-500/20 backdrop-blur-lg rounded-xl border border-blue-400/30 p-4 sm:p-6 animate-pulse">
+                    <div className="h-4 bg-blue-400/30 rounded w-3/4 mb-3"></div>        
+                    <div className="h-3 bg-blue-400/30 rounded w-1/2 mb-4"></div>        
+                    <div className="h-10 bg-blue-400/30 rounded"></div>
                   </div>
                 ))}
               </div>
@@ -246,7 +238,7 @@ function App() {
                 {/* Owned Vaults */}
                 {ownedVaults.length > 0 && (
                   <div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">My Vaults</h2>
+                    <h2 className="text-xl font-semibold text-white mb-4">My Vaults</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">  
                       {ownedVaults.map(vault => (
                         <VaultCard 
@@ -264,9 +256,9 @@ function App() {
                 {/* Guardian Vaults */}
                 {guardianVaults.length > 0 && (
                   <div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">Vaults I Guard</h2>
-                    <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-blue-800 text-sm">
+                    <h2 className="text-xl font-semibold text-white mb-4">Vaults I Guard</h2>
+                    <div className="mb-4 p-4 bg-blue-500/20 backdrop-blur-lg border border-blue-400/30 rounded-xl">
+                      <p className="text-blue-100 text-sm">
                         You are a guardian for these vaults. You can approve withdrawals but cannot initiate them.
                       </p>
                     </div>
@@ -287,10 +279,10 @@ function App() {
                 )}
               </div>
             ) : (
-              <div className="bg-white rounded-xl shadow-md border-2 border-dashed border-gray-300 p-6 sm:p-12 text-center">
+              <div className="bg-blue-500/10 backdrop-blur-lg rounded-xl border-2 border-dashed border-blue-400/30 p-6 sm:p-12 text-center">
                 <div className="text-4xl sm:text-6xl mb-4">🏦</div>
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">No Vaults Found</h3>
-                <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">No Vaults Found</h3>
+                <p className="text-blue-100 text-sm sm:text-base mb-4 sm:mb-6">
                   {account 
                     ? "You don't have any vaults yet. Create your first vault to get started."
                     : "Connect your wallet to see your vaults."
@@ -299,7 +291,7 @@ function App() {
                 {account && (
                   <button
                     onClick={() => setShowVaultModal(true)}
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 sm:px-8 sm:py-3 rounded-lg font-semibold text-sm sm:text-base w-full sm:w-auto"
+                    className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-3 sm:px-8 sm:py-3 rounded-xl font-semibold text-sm sm:text-base w-full sm:w-auto shadow-lg shadow-cyan-500/30"
                   >
                     Create First Vault
                   </button>
@@ -315,7 +307,7 @@ function App() {
       case "settings":
         return <SettingsPage account={account} />;
       default:
-        return <div>Page not found</div>;
+        return <div className="text-white">Page not found</div>;
     }
   };
 
@@ -324,97 +316,105 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16">
-            <div className="flex items-center gap-4 sm:gap-8">
-              <div className="flex items-center gap-2 sm:gap-3 cursor-pointer" onClick={() => { setCurrentPage("dashboard"); setIsMobileMenuOpen(false); }}>
-                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#1e3a8a] rounded-lg flex items-center justify-center">
-                  <span className="text-white text-xs sm:text-sm">🦉</span>
-                </div>
-                <span className="text-lg sm:text-xl font-bold text-gray-900">OwlVault</span>     
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900">
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-blue-800/90 backdrop-blur-xl border-r border-blue-600/30 transform transition-transform duration-300 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="flex flex-col h-full">
+          {/* Logo */}
+          <div className="p-6 border-b border-blue-600/30">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                <span className="text-white text-lg font-bold">🦉</span>
               </div>
-
-              {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center gap-1">
-                {navigation.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setCurrentPage(item.id)}
-                    className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors text-sm sm:text-base ${ 
-                      currentPage === item.id
-                        ? "bg-blue-100 text-[#1e3a8a]"
-                        : "text-gray-600 hover:text-gray-900"
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
-              >
-                {isMobileMenuOpen ? "✕" : "☰"}
-              </button>
-
-              {account ? (
-                <div className="flex items-center gap-2 sm:gap-3 bg-green-50 border border-green-200 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2">
-                  <span className="text-xs sm:text-sm font-medium text-green-800">
-                    {formatAddress(account)}
-                  </span>
-                  <button
-                    onClick={() => setAccount(null)}
-                    className="p-1 hover:bg-green-100 rounded text-xs sm:text-sm transition-colors"
-                  >
-                    Disconnect
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={connectWallet}
-                  disabled={isConnecting}
-                  className="flex items-center gap-2 bg-[#1e3a8a] hover:bg-blue-700 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors text-sm sm:text-base"
-                >
-                  <span>🔗</span>
-                  {isConnecting ? "Connecting..." : "Connect Wallet"}
-                </button>
-              )}
+              <span className="text-white text-xl font-light">OwlVault</span>
             </div>
           </div>
 
-          {/* Mobile Navigation */}
-          {isMobileMenuOpen && (
-            <nav className="md:hidden border-t border-gray-200 py-4">
-              <div className="grid grid-cols-2 gap-2">
-                {navigation.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => { setCurrentPage(item.id); setIsMobileMenuOpen(false); }}
-                    className={`px-3 py-2 rounded-lg font-medium transition-colors text-sm text-center ${
-                      currentPage === item.id
-                        ? "bg-blue-100 text-[#1e3a8a]"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+          {/* Navigation */}
+          <nav className="flex-1 p-4 space-y-2">
+            {navigation.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setCurrentPage(item.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+                  currentPage === item.id
+                    ? "bg-cyan-500/20 text-cyan-100 border border-cyan-400/30 shadow-lg shadow-cyan-500/20"
+                    : "text-blue-100 hover:bg-blue-700/50 hover:text-white"
+                }`}
+              >
+                <span className="text-lg">{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+
+          {/* Wallet Connection */}
+          <div className="p-4 border-t border-blue-600/30">
+            {account ? (
+              <div className="bg-green-500/20 backdrop-blur-lg border border-green-400/30 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-green-100 text-sm font-medium">Connected</span>
+                </div>
+                <p className="text-white text-sm font-mono">{formatAddress(account)}</p>
+                <button
+                  onClick={() => setAccount(null)}
+                  className="w-full mt-2 bg-red-500/20 hover:bg-red-500/30 text-red-100 text-sm py-2 rounded-lg border border-red-400/30 transition-colors"
+                >
+                  Disconnect
+                </button>
               </div>
-            </nav>
-          )}
+            ) : (
+              <button
+                onClick={connectWallet}
+                disabled={isConnecting}
+                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:from-cyan-400 disabled:to-blue-400 text-white py-3 rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-cyan-500/30"
+              >
+                {isConnecting ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Connecting...
+                  </div>
+                ) : (
+                  "Connect Wallet"
+                )}
+              </button>
+            )}
+          </div>
         </div>
-      </header>
+      </div>
 
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {renderPage()}
-      </main>
+      {/* Main Content */}
+      <div className={`min-h-screen transition-all duration-300 ${
+        sidebarOpen ? 'ml-64' : 'ml-0'
+      }`}>
+        {/* Top Bar */}
+        <header className="bg-blue-800/50 backdrop-blur-xl border-b border-blue-600/30">
+          <div className="flex items-center justify-between p-4">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 text-blue-100 hover:text-white hover:bg-blue-700/50 rounded-lg transition-colors"
+            >
+              {sidebarOpen ? "◀" : "▶"}
+            </button>
+            
+            <div className="flex items-center gap-4">
+              <div className="text-blue-100 text-sm">
+                {account ? `Welcome, ${formatAddress(account)}` : "Please connect wallet"}
+              </div>
+            </div>
+          </div>
+        </header>
 
+        {/* Page Content */}
+        <main className="p-6">
+          {renderPage()}
+        </main>
+      </div>
+
+      {/* Modals */}
       {showVaultModal && (
         <CreateVaultModal
           onClose={() => setShowVaultModal(false)}

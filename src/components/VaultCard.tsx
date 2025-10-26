@@ -26,7 +26,6 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
     setIsLoading(true);
     try {
       if (isDemo) {
-        // Demo vault - use mock data
         setVaultInfo({
           owner: "0xDemoAddress1234567890",
           balance: ethers.parseEther("1.5"),
@@ -39,14 +38,12 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
         setIsRealVault(false);
         setUserRole("owner");
       } else {
-        // Real vault - try to load from blockchain
         try {
           const contract = await getContract();
           const info = await contract.getVaultInfo(vaultId);
           setVaultInfo(info);
           setIsRealVault(true);
           
-          // Check user role
           const accounts = await window.ethereum.request({ method: "eth_accounts" });
           if (accounts.length > 0) {
             const userAddress = accounts[0].toLowerCase();
@@ -62,7 +59,6 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
           }
         } catch (blockchainError) {
           console.warn(`Vault ${vaultId} not found on blockchain, showing as demo`, blockchainError);
-          // If vault doesn't exist on blockchain, show as demo
           setVaultInfo({
             owner: "0x0000000000000000000000000000000000000000",
             balance: ethers.parseEther("0"),
@@ -78,7 +74,6 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
       }
     } catch (error) {
       console.error("Error loading vault info:", error);
-      // Fallback to empty vault
       setVaultInfo({
         owner: "0x0000000000000000000000000000000000000000",
         balance: ethers.parseEther("0"),
@@ -109,24 +104,21 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
     setIsDepositing(true);
     try {
       if (!isRealVault) {
-        // Demo mode
         await new Promise(resolve => setTimeout(resolve, 2000));
         alert(`Demo: Deposited ${depositAmount} BDAG to Vault #${vaultId}`);
         setDepositAmount("");
-        // Update local state for demo
         setVaultInfo(prev => ({
           ...prev,
           balance: (prev.balance || 0n) + ethers.parseEther(depositAmount)
         }));
       } else {
-        // Real blockchain deposit
         const contract = await getContract();
         const value = ethers.parseEther(depositAmount);
         const tx = await contract.depositToVault(vaultId, { value });
         await tx.wait();
         alert(`Successfully deposited ${depositAmount} BDAG to Vault #${vaultId}!`);
         setDepositAmount("");
-        loadVaultInfo(); // Refresh vault info
+        loadVaultInfo();
         onUpdate();
       }
     } catch (error: any) {
@@ -151,11 +143,9 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
     setIsWithdrawing(true);
     try {
       if (!isRealVault) {
-        // Demo mode
         await new Promise(resolve => setTimeout(resolve, 2000));
         alert(`Demo: Withdrawal request submitted for Vault #${vaultId}. Requires guardian approval.`);
       } else {
-        // Real blockchain withdrawal request
         const contract = await getContract();
         const tx = await contract.requestWithdrawal(vaultId, vaultInfo.balance);
         await tx.wait();
@@ -166,7 +156,7 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
           alert("Withdrawal approval submitted! Waiting for other guardians.");
         }
         
-        loadVaultInfo(); // Refresh vault info
+        loadVaultInfo();
         onUpdate();
       }
     } catch (error: any) {
@@ -179,18 +169,18 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 animate-pulse">
-        <div className="h-4 bg-gray-200 rounded w-3/4 mb-3"></div>
-        <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
-        <div className="h-10 bg-gray-200 rounded"></div>
+      <div className="bg-blue-500/20 backdrop-blur-lg rounded-xl border border-blue-400/30 p-6 animate-pulse">
+        <div className="h-4 bg-blue-400/30 rounded w-3/4 mb-3"></div>
+        <div className="h-3 bg-blue-400/30 rounded w-1/2 mb-4"></div>
+        <div className="h-10 bg-blue-400/30 rounded"></div>
       </div>
     );
   }
 
   if (!vaultInfo) {
     return (
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 text-center">
-        <p className="text-gray-600 text-sm sm:text-base">Vault #{vaultId} not found</p>
+      <div className="bg-blue-500/20 backdrop-blur-lg rounded-xl border border-blue-400/30 p-6 text-center">
+        <p className="text-blue-100 text-sm">Vault #{vaultId} not found</p>
       </div>
     );
   }
@@ -199,62 +189,62 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
   const isEmptyVault = vaultInfo.balance <= 0 && vaultInfo.owner === "0x0000000000000000000000000000000000000000";
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 hover:shadow-xl transition-shadow">
-      <div className="flex items-start justify-between mb-3 sm:mb-4">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className={`p-1.5 sm:p-2 rounded-lg text-sm sm:text-base ${
-            isLocked ? "bg-orange-100 text-orange-600" : "bg-green-100 text-green-600"
+    <div className="bg-blue-500/10 backdrop-blur-lg rounded-xl border border-blue-400/30 p-6 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg text-base ${
+            isLocked ? "bg-orange-500/20 text-orange-300 border border-orange-400/30" : "bg-green-500/20 text-green-300 border border-green-400/30"
           }`}>
             {isLocked ? "🔒" : "🔓"}
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
+            <h3 className="font-semibold text-white text-base">
               Vault #{vaultId} 
               {!isRealVault && " 🎭"}
               {isEmptyVault && " (Empty)"}
             </h3>
-            <p className="text-xs sm:text-sm text-gray-600">
+            <p className="text-blue-100 text-sm">
               {isEmptyVault ? "No owner" : formatAddress(vaultInfo.owner)}
             </p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <div className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-xs font-medium ${
-            isLocked ? "bg-orange-100 text-orange-700" : "bg-green-100 text-green-700"
+          <div className={`px-2 py-1 rounded text-xs font-medium ${
+            isLocked ? "bg-orange-500/20 text-orange-300 border border-orange-400/30" : "bg-green-500/20 text-green-300 border border-green-400/30"
           }`}>
             {isLocked ? "Locked" : "Unlocked"}
           </div>
           {userRole === "guardian" && (
-            <div className="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
+            <div className="px-2 py-1 rounded text-xs font-medium bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
               Guardian
             </div>
           )}
           {!isRealVault && (
-            <div className="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-xs font-medium bg-purple-100 text-purple-700">
+            <div className="px-2 py-1 rounded text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-400/30">
               Demo
             </div>
           )}
         </div>
       </div>
 
-      <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
+      <div className="space-y-3 mb-4">
         <div className="flex justify-between items-center">
-          <span className="text-xs sm:text-sm text-gray-600">Balance:</span>
-          <span className="font-semibold text-gray-900 text-sm sm:text-base">
+          <span className="text-blue-100 text-sm">Balance:</span>
+          <span className="font-semibold text-white text-base">
             {formatBalance(vaultInfo.balance)}
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-xs sm:text-sm text-gray-600">Guardians:</span>
-          <span className="font-medium text-gray-900 text-sm sm:text-base">
+          <span className="text-blue-100 text-sm">Guardians:</span>
+          <span className="font-medium text-white text-base">
             {vaultInfo.guardians?.length || 0}
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-xs sm:text-sm text-gray-600">Your Role:</span>
-          <span className={`text-xs sm:text-sm font-medium ${
-            userRole === "owner" ? "text-green-600" :
-            userRole === "guardian" ? "text-blue-600" : "text-gray-600"
+          <span className="text-blue-100 text-sm">Your Role:</span>
+          <span className={`text-sm font-medium ${
+            userRole === "owner" ? "text-green-300" :
+            userRole === "guardian" ? "text-cyan-300" : "text-blue-300"
           }`}>
             {userRole === "owner" ? "Owner" :
              userRole === "guardian" ? "Guardian" : "No Access"}
@@ -264,8 +254,8 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
 
       {/* Deposit Input - Only for owners */}
       {userRole === "owner" && (
-        <div className="mb-2 sm:mb-3">
-          <div className="flex gap-1.5 sm:gap-2">
+        <div className="mb-3">
+          <div className="flex gap-2">
             <input
               type="number"
               step="0.001"
@@ -273,12 +263,12 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
               value={depositAmount}
               onChange={(e) => setDepositAmount(e.target.value)}
               placeholder="0.00"
-              className="flex-1 px-2 py-1.5 sm:px-3 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm"
+              className="flex-1 px-3 py-2 bg-blue-600/30 border border-blue-400/50 rounded-lg text-white text-sm placeholder-blue-300 focus:outline-none focus:border-cyan-400"
             />
             <button 
               onClick={handleDeposit}
               disabled={isDepositing || !depositAmount}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-1.5 px-2 sm:py-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-colors"
+              className="bg-cyan-500 hover:bg-cyan-600 disabled:bg-cyan-400 text-white py-2 px-3 rounded-lg text-sm font-medium transition-colors shadow-lg shadow-cyan-500/30"
             >
               {isDepositing ? "..." : "Deposit"}
             </button>
@@ -288,11 +278,11 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
 
       {/* Withdraw Button - For owners and guardians */}
       {(userRole === "owner" || userRole === "guardian") && (
-        <div className="flex gap-1.5 sm:gap-2">
+        <div className="flex gap-2">
           <button
             onClick={handleWithdraw}
             disabled={isLocked || isWithdrawing || vaultInfo.balance <= 0 || isEmptyVault}
-            className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-colors"
+            className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white py-2 px-3 rounded-lg text-sm font-medium transition-colors shadow-lg shadow-green-500/30"
           >
             {isWithdrawing ? "..." : 
              userRole === "owner" ? "Withdraw" : "Approve Withdrawal"}
@@ -304,7 +294,7 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
       {userRole === "owner" && !isEmptyVault && (
         <button
           onClick={() => onManageAccess && onManageAccess(vaultId)}
-          className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white py-1.5 sm:py-2 px-2 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-1 sm:gap-2"
+          className="w-full mt-3 bg-purple-500 hover:bg-purple-600 text-white py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30"
         >
           <span>👥</span>
           Manage Access
@@ -312,16 +302,16 @@ const VaultCard = ({ vaultId, onUpdate, isDemo = false, onManageAccess }: VaultC
       )}
 
       {userRole === "guardian" && (
-        <div className="mt-2 p-1.5 sm:p-2 bg-blue-50 border border-blue-200 rounded text-center">
-          <p className="text-xs text-blue-700">
+        <div className="mt-3 p-2 bg-cyan-500/20 border border-cyan-400/30 rounded text-center">
+          <p className="text-cyan-100 text-xs">
             You are a guardian. You can approve withdrawals but cannot deposit or manage access.
           </p>
         </div>
       )}
 
       {!isRealVault && (
-        <div className="mt-2 p-1.5 sm:p-2 bg-purple-50 border border-purple-200 rounded text-center">
-          <p className="text-xs text-purple-700">
+        <div className="mt-3 p-2 bg-purple-500/20 border border-purple-400/30 rounded text-center">
+          <p className="text-purple-100 text-xs">
             {isEmptyVault ? "Vault not found on blockchain" : "Demo Vault - No blockchain interaction"}
           </p>
         </div>

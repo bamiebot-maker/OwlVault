@@ -1,0 +1,7 @@
+﻿{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "src/**/*.backup.tsx",
+    "src/**/*.backup-blue.tsx"
+  ]
+}

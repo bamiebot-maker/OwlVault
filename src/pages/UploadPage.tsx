@@ -1,11 +1,11 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { getContract } from "../utils/blockchain";
 
 interface Document {
   id: string;
   name: string;
-  encryptedHash: string;
+  _encryptedHash: string;
   timestamp: Date;
   size: number;
   isOwner: boolean;
@@ -130,8 +130,8 @@ const UploadPage = () => {
       reader.onload = (e) => {
         const content = e.target?.result as string;
         // In real app, use proper encryption like Web Crypto API
-        const encryptedHash = ethers.keccak256(ethers.toUtf8Bytes(content + Date.now() + Math.random()));
-        resolve(encryptedHash);
+        const _encryptedHash = ethers.keccak256(ethers.toUtf8Bytes(content + Date.now() + Math.random()));
+        resolve(_encryptedHash);
       };
       reader.readAsText(file);
     });
@@ -183,18 +183,18 @@ const UploadPage = () => {
 
     setIsUploading(true);
     try {
-      const encryptedHash = await encryptFile(selectedFile);
+      const _encryptedHash = await encryptFile(selectedFile);
       const docId = `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       // In real app, store on blockchain
       // const contract = await getContract();
-      // const tx = await contract.storeDocument(docId, encryptedHash);
+      // const tx = await contract.storeDocument(docId, _encryptedHash);
       // await tx.wait();
 
       const newDoc: Document = {
         id: docId,
         name: selectedFile.name,
-        encryptedHash: encryptedHash,
+        _encryptedHash: _encryptedHash,
         timestamp: new Date(),
         size: selectedFile.size,
         isOwner: true,
@@ -207,7 +207,7 @@ const UploadPage = () => {
       
       // Update local state
       setDocuments(prev => [newDoc, ...prev]);
-      alert(`File "${selectedFile.name}" encrypted and stored successfully! 🦉`);
+      alert(`File "${selectedFile.name}" encrypted and stored successfully! ??`);
       setSelectedFile(null);
     } catch (error: any) {
       console.error("Upload error:", error);
@@ -272,7 +272,7 @@ const UploadPage = () => {
     }
   };
 
-  const handleDecrypt = async (docId: string, encryptedHash: string, isOwner: boolean) => {
+  const handleDecrypt = async (docId: string, _encryptedHash: string, isOwner: boolean) => {
     if (!account) {
       alert("Please connect your wallet first");
       return;
@@ -310,7 +310,7 @@ const UploadPage = () => {
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-12 text-center">
-          <div className="text-6xl mb-6">🔐</div>
+          <div className="text-6xl mb-6">??</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Wallet Required</h2>
           <p className="text-gray-600 mb-8 max-w-md mx-auto">
             Please connect your wallet to encrypt, upload, and manage documents securely.
@@ -355,7 +355,7 @@ const UploadPage = () => {
           >
             {!selectedFile ? (
               <div className="space-y-6">
-                <div className="text-6xl">📁</div>
+                <div className="text-6xl">??</div>
                 <div>
                   <p className="text-xl font-semibold text-gray-900 mb-2">
                     Drop your file here
@@ -380,7 +380,7 @@ const UploadPage = () => {
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="text-4xl">✅</div>
+                <div className="text-4xl">?</div>
                 <div>
                   <p className="text-xl font-semibold text-gray-900 mb-2">
                     File Selected
@@ -424,7 +424,7 @@ const UploadPage = () => {
                       <div>
                         <p className="font-medium text-gray-900">{doc.name}</p>
                         <p className="text-xs text-gray-500">
-                          {doc.timestamp.toLocaleDateString()} • {(doc.size / 1024).toFixed(1)} KB
+                          {doc.timestamp.toLocaleDateString()} � {(doc.size / 1024).toFixed(1)} KB
                         </p>
                         {doc.sharedWith.length > 0 && (
                           <p className="text-xs text-green-600 mt-1">
@@ -434,7 +434,7 @@ const UploadPage = () => {
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleDecrypt(doc.id, doc.encryptedHash, true)}
+                          onClick={() => handleDecrypt(doc.id, doc._encryptedHash, true)}
                           className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
                         >
                           Decrypt
@@ -479,7 +479,7 @@ const UploadPage = () => {
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">
-                <div className="text-4xl mb-4">📄</div>
+                <div className="text-4xl mb-4">??</div>
                 <p>No documents uploaded yet</p>
                 <p className="text-sm">Upload a file to see it here</p>
               </div>
@@ -498,11 +498,11 @@ const UploadPage = () => {
                       <div>
                         <p className="font-medium text-gray-900">{doc.name}</p>
                         <p className="text-xs text-gray-500">
-                          {doc.timestamp.toLocaleDateString()} • Owner: {doc.owner.slice(0, 6)}...{doc.owner.slice(-4)}
+                          {doc.timestamp.toLocaleDateString()} � Owner: {doc.owner.slice(0, 6)}...{doc.owner.slice(-4)}
                         </p>
                       </div>
                       <button
-                        onClick={() => handleDecrypt(doc.id, doc.encryptedHash, false)}
+                        onClick={() => handleDecrypt(doc.id, doc._encryptedHash, false)}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
                       >
                         Decrypt
@@ -513,7 +513,7 @@ const UploadPage = () => {
               </div>
             ) : (
               <div className="text-center py-6 text-gray-500">
-                <div className="text-3xl mb-2">👥</div>
+                <div className="text-3xl mb-2">??</div>
                 <p className="text-sm">No documents shared with you</p>
               </div>
             )}

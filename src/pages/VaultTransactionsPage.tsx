@@ -1,6 +1,6 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { getContract, formatAddress } from "../utils/blockchain";
+import { getContract, _formatAddress } from "../utils/blockchain";
 
 interface Transaction {
   id: string;
@@ -106,7 +106,7 @@ const VaultTransactionsPage = () => {
     }
   };
 
-  const loadVaultTransactions = async (vaultId: number) => {
+  const loadVaultTransactions = async (_vaultId: number) => {
     if (!account) return;
     
     try {
@@ -184,7 +184,7 @@ const VaultTransactionsPage = () => {
             ? { ...t, status: "completed", confirmations: 12 }
             : t
         ));
-        alert("Deposit successful! 🎉");
+        alert("Deposit successful! ??");
         loadUserVaults(); // Refresh vault balances
       } else {
         setTransactions(prev => prev.map(t => 
@@ -240,7 +240,7 @@ const VaultTransactionsPage = () => {
             ? { ...t, status: "completed", confirmations: 12 }
             : t
         ));
-        alert("Withdrawal request submitted! Waiting for guardian approvals. ✅");
+        alert("Withdrawal request submitted! Waiting for guardian approvals. ?");
         loadUserVaults();
       } else {
         setTransactions(prev => prev.map(t => 
@@ -269,7 +269,7 @@ const VaultTransactionsPage = () => {
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-12 text-center">
-          <div className="text-6xl mb-6">💳</div>
+          <div className="text-6xl mb-6">??</div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Wallet Required</h2>
           <p className="text-gray-600 mb-8 max-w-md mx-auto">
             Please connect your wallet to view and manage your vault transactions securely.
@@ -314,7 +314,7 @@ const VaultTransactionsPage = () => {
 
       {userVaults.length === 0 ? (
         <div className="bg-white rounded-xl shadow-md border-2 border-dashed border-gray-300 p-12 text-center">
-          <div className="text-6xl mb-4">🏦</div>
+          <div className="text-6xl mb-4">??</div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">No Vaults Found</h3>
           <p className="text-gray-600">Create a vault first to start making transactions</p>
         </div>
@@ -418,7 +418,7 @@ const VaultTransactionsPage = () => {
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                           tx.type === "deposit" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
                         }`}>
-                          {tx.type === "deposit" ? "⬇️" : "⬆️"}
+                          {tx.type === "deposit" ? "??" : "??"}
                         </div>
                         <div>
                           <p className="font-medium capitalize">{tx.type}</p>
@@ -461,7 +461,7 @@ const VaultTransactionsPage = () => {
               </div>
             ) : (
               <div className="text-center py-12 text-gray-500">
-                <div className="text-4xl mb-4">📊</div>
+                <div className="text-4xl mb-4">??</div>
                 <p>No transactions yet</p>
                 <p className="text-sm">Transactions will appear here</p>
               </div>

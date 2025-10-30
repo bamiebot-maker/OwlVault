@@ -116,6 +116,9 @@ export const useOwlVault = () => {
 
         setAccount(account);
 
+        // Store connection state in localStorage for auto-reconnect
+        localStorage.setItem('owlvault_wallet_connected', 'true');
+
         console.log('Wallet connected successfully to BlockDAG Awakening:', account);
         return { success: true, account };
       } catch (error) {
@@ -123,6 +126,7 @@ export const useOwlVault = () => {
         const errorMessage = (error as Error).message;
         setNetworkError(errorMessage);
         setIsDisconnected(true);
+        localStorage.removeItem('owlvault_wallet_connected');
         return { success: false, error: errorMessage };
       } finally {
         setLoading(false);
@@ -130,6 +134,7 @@ export const useOwlVault = () => {
     } else {
       const errorMessage = "MetaMask not installed";
       setNetworkError(errorMessage);
+      localStorage.removeItem('owlvault_wallet_connected');
       return { success: false, error: errorMessage };
     }
   };
@@ -141,27 +146,67 @@ export const useOwlVault = () => {
     setNetworkError(null);
     setIsDisconnected(true);
 
-    // Clear any stored connection state
-    localStorage.removeItem('walletConnected');
-    sessionStorage.removeItem('walletConnected');
+    // Clear connection state
+    localStorage.removeItem('owlvault_wallet_connected');
 
     console.log('Wallet disconnected successfully');
   };
 
-  // Check if wallet was previously connected
+  // Check if wallet was previously connected (improved version)
   const checkExistingConnection = async () => {
-    if (typeof window.ethereum !== 'undefined' && !isDisconnected) {
+    if (typeof window.ethereum !== 'undefined') {
       try {
+        const wasConnected = localStorage.getItem('owlvault_wallet_connected') === 'true';
         const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (accounts.length > 0) {
+        
+        if (wasConnected && accounts.length > 0 && !isDisconnected) {
           console.log('Found existing connection, auto-connecting...');
           await connectWallet();
+        } else if (accounts.length === 0) {
+          // No accounts connected, ensure disconnected state
+          setIsDisconnected(true);
+          localStorage.removeItem('owlvault_wallet_connected');
         }
       } catch (error) {
         console.error('Auto-connect error:', error);
+        setIsDisconnected(true);
+        localStorage.removeItem('owlvault_wallet_connected');
       }
     }
   };
+
+  // Listen for account changes
+  useEffect(() => {
+    if (typeof window.ethereum !== 'undefined') {
+      const handleAccountsChanged = (accounts: string[]) => {
+        if (accounts.length === 0) {
+          // User disconnected wallet
+          disconnectWallet();
+        } else if (account !== accounts[0]) {
+          // Account changed
+          setAccount(accounts[0]);
+        }
+      };
+
+      const handleChainChanged = () => {
+        // Reload the page when chain changes
+        window.location.reload();
+      };
+
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      window.ethereum.on('chainChanged', handleChainChanged);
+
+      return () => {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener('chainChanged', handleChainChanged);
+      };
+    }
+  }, [account]);
+
+  // Auto-connect on component mount if wallet was previously connected
+  useEffect(() => {
+    checkExistingConnection();
+  }, []);
 
   // ============ VAULT FUNCTIONS ============
 
@@ -323,11 +368,6 @@ export const useOwlVault = () => {
       setLoading(false);
     }
   };
-
-  // Auto-connect on component mount if wallet was previously connected
-  useEffect(() => {
-    checkExistingConnection();
-  }, []);
 
   return {
     contract,

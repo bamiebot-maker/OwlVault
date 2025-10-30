@@ -33,8 +33,6 @@ const BLOCKDAG_CONFIG = {
 
 export const useOwlVault = () => {
   const [contract, setContract] = useState<ethers.Contract | null>(null);
-  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
-  const [signer, setSigner] = useState<ethers.Signer | null>(null);
   const [account, setAccount] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [isDisconnected, setIsDisconnected] = useState(false);
@@ -116,8 +114,6 @@ export const useOwlVault = () => {
           console.log('Contract instance created');
         }
 
-        setProvider(provider);
-        setSigner(signer);
         setAccount(account);
 
         console.log('Wallet connected successfully to BlockDAG Awakening:', account);
@@ -141,8 +137,6 @@ export const useOwlVault = () => {
   const disconnectWallet = () => {
     console.log('Disconnecting wallet...');
     setContract(null);
-    setProvider(null);
-    setSigner(null);
     setAccount(null);
     setNetworkError(null);
     setIsDisconnected(true);

@@ -114,9 +114,9 @@ logActivity() → Immutable event logging.
 
 Role	Name
 Project Lead / Fullstack Dev	Ibrahim Bamidele
-Smart Contract Dev	Dev Bamie
-Frontend Developer	Abdulzeez
-Product Designer	Joses
+Smart Contract Dev	Ibrahim Bamidele
+Frontend Developer	Makama Joses
+Product Designer	Naimah Abdulzeez
 
 📜 License
 MIT License © 2025 EagleDevs

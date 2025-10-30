@@ -45,6 +45,12 @@ const GuardianApprovals: React.FC = () => {
     return { text: `${vault.approvalCount}/2 Approvals`, color: 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30' };
   };
 
+  const hasApproved = (vault: any) => {
+    // Check if current user has approved this vault
+    if (!account || !vault.approvals) return false;
+    return vault.approvals[account] === true;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a1a] via-[#0f0f23] to-[#1a1a2e]">
       <div className="container mx-auto px-4 py-6 lg:py-8">
@@ -76,7 +82,7 @@ const GuardianApprovals: React.FC = () => {
           <div className="space-y-6">
             {guardianVaults.map((vault) => {
               const status = getApprovalStatus(vault);
-              const hasApproved = vault.approvals && vault.approvals[account] === true;
+              const userHasApproved = hasApproved(vault);
               
               return (
                 <div key={vault.id} className="glass rounded-xl p-6 border border-blue-500/20">
@@ -137,16 +143,16 @@ const GuardianApprovals: React.FC = () => {
                     <div className="flex space-x-3">
                       <button
                         onClick={() => handleApprove(vault.id)}
-                        disabled={hasApproved || approving === vault.id}
+                        disabled={userHasApproved || approving === vault.id}
                         className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-300 border ${
-                          hasApproved
+                          userHasApproved
                             ? 'bg-green-500/20 text-green-400 border-green-500/30 cursor-not-allowed'
                             : approving === vault.id
                             ? 'bg-blue-500/20 text-blue-400 border-blue-500/30 cursor-not-allowed'
                             : 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500 hover:shadow-lg hover:shadow-blue-500/20'
                         }`}
                       >
-                        {hasApproved
+                        {userHasApproved
                           ? '✓ Approved'
                           : approving === vault.id
                           ? 'Approving...'
